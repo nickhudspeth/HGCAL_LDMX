@@ -99,6 +99,8 @@ void DetectorConstruction::buildECal()
 {
 
     std::vector<std::pair <G4double, std::string>> iEleL, iEleR;
+    /* Alternate tuple vector for use with CAD import */
+    std::vector<std::tuple <G4double, std::string, std::string>> cEleL, cEleR;
     initLayer(1);
     if (version_ == HGCAL_E26_TH || version_ == HGCAL_E26_T || version_ == HGCAL_E26_H || version_ == HGCAL_E26)
     {
@@ -189,7 +191,33 @@ void DetectorConstruction::buildECal()
             m_caloStruct.push_back( SamplingSection(iEleL) );
         }
     }
+    else if (version_ == HGCAL_E_40_TH_CAD)
+    {
+        /* Push back single modules to front of calorimeter stack */
+        unsigned int Nmodule = 10;
+        cEleL.clear();
+        for (unsigned int i = 0; i < cmd_hex.hex_module_single.size() i++)
+        {
+            cEleL.push_back(make_tuple(cmd_hex[i].thickness, cmd_hex[i].material, cmd_hex[i].filename));
+        }
+        for (unsigned int i = 0; i < Nmodule; i++)
+        {
+            m_caloStruct.push_back(SamplingSection(cEleL));
+        }
 
+        /* Push back cluster modules behind single modules */
+        iEleL.clear();
+        for (unsigned int i = 0; i < cmd_hex.hex_module_cluster.size() i++)
+        {
+            iEleL.push_back(make_tuple(cmd_hex[i].thickness, cmd_hex[i].material, cmd_hex[i].filename));
+        }
+        Nmodule = 32;
+        for (unsigned int i = 0; i < Nmodule; i++)
+        {
+            m_caloStruct.push_back(SamplingSection(cEleL));
+        }
+
+    }
 }
 
 void DetectorConstruction::buildHCal(double steelThick)
@@ -505,10 +533,19 @@ void DetectorConstruction::buildSectorStack(const unsigned sectorNum,
                      << ",zOffset+zOverburden=" << zOffset + zOverburden
                      << ",width=" << width << ");" << endl;
 #endif
-                solid = constructSolid(baseName, thick, zOffset + zOverburden,
-                                       minL, width, i);
+                if (version_ == HGCAL_E40_TH_CAD)
+                {
+                    solid = constructSolid(baseName, thick, zOffset + zOverburden,
+                                           minL, width, i, m_caloStruct[i].filenames.[ie]);
+                }
+                else
+                {
+                    solid = constructSolid(baseName, thick, zOffset + zOverburden,
+                                           minL, width, i);
+                }
                 G4LogicalVolume *logi = new G4LogicalVolume(solid,
                         m_materials[eleName], baseName + "log");
+
                 m_caloStruct[i].sublayer_X0[ie] = m_materials[eleName]->GetRadlen();
                 m_caloStruct[i].sublayer_dEdx[ie] = m_dEdx[eleName];
                 m_caloStruct[i].sublayer_L0[ie] =
@@ -595,8 +632,16 @@ void DetectorConstruction::fillInterSectorSpace(const unsigned sectorNum,
             std::string baseName(nameBuf);
             if (thick > 0)
             {
-                solid = constructSolid(baseName, thick, zOffset + zOverburden,
-                                       minL, width, i);
+                if (version_ == HGCAL_E40_TH_CAD)
+                {
+                    solid = constructSolid(baseName, thick, zOffset + zOverburden,
+                                           minL, width, i, m_caloStruct[i].filenames.[ie]);
+                }
+                else
+                {
+                    solid = constructSolid(baseName, thick, zOffset + zOverburden,
+                                           minL, width, i);
+                }
                 G4LogicalVolume *logi = new G4LogicalVolume(solid,
                         m_materials[eleName], baseName + "log");
                 G4double xpvpos = -m_CalorSizeXY / 2. + minL + width / 2;
@@ -673,6 +718,33 @@ G4VSolid *DetectorConstruction::constructSolid(std::string baseName,
             solid = new G4Box(baseName + "box", width / 2, m_CalorSizeXY / 2,
                               thick / 2);
         }
+
     }
     return solid;
 }
+
+G4VSolid *DetectorConstruction::constructSolid(std::string baseName,
+        G4double thick, G4double zpos, const G4double & minL,
+        const G4double & width, size_t which_ele, std::string filename)
+{
+    G4ThreeVector offset;
+    G4VSolid *solid;
+    offset = G4ThreeVector(zpos * mm, 0, 0); /* check the units here */
+    CADMesh *mesh = new CADMesh(filename, mm, offset, false);
+    if (which_ele == 0)
+    {
+        solid = new G4Box(baseName + "box", width / 2, m_CalorSizeXY / 2,
+                          thick / 2);
+        //set the offset!
+        if (baseName == "W1")
+        {
+            m_z0pos = zpos;
+        }
+    }
+    else
+    {
+        solid = mesh->TessellatedMesh();
+    }
+    return solid;
+}
+

@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 
+#include "CADModuleDefinition.hh"
 class G4VSolid;
 class G4Box;
 class G4LogicalVolume;
@@ -169,7 +170,10 @@ private:
     G4VSolid *constructSolid(std::string baseName, G4double thick,
                              G4double zpos, const G4double & minL, const G4double & width,
                              const size_t which_ele);
-
+    /* Alternate version of constructSolid for use with CAD models */
+    G4VSolid *constructSolid(std::string baseName,
+                             G4double thick, G4double zpos, const G4double & minL,
+                             const G4double & width, size_t which_ele, std::string filename)
     std::vector<G4Material*> m_SensitiveMaterial;
     G4int initLayer_;
     G4double m_CalorSizeXY, m_CalorSizeZ;
@@ -182,11 +186,10 @@ private:
     G4VSolid* m_solidWorld;    //pointer to the solid World
     G4LogicalVolume* m_logicWorld;    //pointer to the logical World
     G4VPhysicalVolume* m_physWorld;     //pointer to the physical World
-
-    std::vector<G4LogicalVolume*> m_logicSi; //pointer to the logical Si volumes
     std::vector<G4LogicalVolume*> m_logicAbs; //pointer to the logical absorber volumes situated just before the si
 
     DetectorMessenger* m_detectorMessenger;  //pointer to the Messenger
+    CADModuleDefinition cmd_hex;
 };
 
 #endif

@@ -29,7 +29,7 @@ include $(G4INSTALL)/config/binmake.gmk
 #    CPPFLAGS += -DG4LIB_USE_PYTHIA
 #endif
 
-INCFLAGS += -I$(HEPMC_DIR)/include/
+INCFLAGS += -I$(HEPMC_DIR)/include/ -ICADMesh/include
 
 ifdef G4LIB_USE_PYTHIA
       LDLIBS1 += -L$(HEPMC_DIR)/lib -lHepMC -lHepMCfio -L$(G4TMPDIR) -lPythia6 -lg2c
