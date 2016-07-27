@@ -329,7 +329,7 @@ public:
 			unsigned abs_HitVec_size_max;
 
 			bool hasScintillator;
-
+            std::string filename; /* Filename field for use when importing CAD models */
 		};
 
 #endif
