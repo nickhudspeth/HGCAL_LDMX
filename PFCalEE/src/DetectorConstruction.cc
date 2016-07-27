@@ -264,7 +264,8 @@ void DetectorConstruction::DefineMaterials()
     m_dEdx["Ni"] = 1.307;
     m_materials["O"] = nistManager->FindOrBuildMaterial("G4_O", false);
     m_materials["Br"] = nistManager->FindOrBuildMaterial("G4_Br", false);
-
+    m_materials["Kapton"] = nistmanager->FindOrBuildMaterial("G4_KAPTON", false);
+    m_dEdx["Kapton"] = 0;
     m_materials["PCB"] = new G4Material("FR4", 1.700 * g / cm3, 5);
     m_materials["PCB"]->AddMaterial(m_materials["Si"], 0.18077359);
     m_materials["PCB"]->AddMaterial(m_materials["O"], 0.4056325);
