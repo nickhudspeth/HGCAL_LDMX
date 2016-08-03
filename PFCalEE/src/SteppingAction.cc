@@ -27,7 +27,9 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep) {
 	// get PreStepPoint
 	const G4StepPoint *thePreStepPoint = aStep->GetPreStepPoint();
 	const G4StepPoint *thePostStepPoint = aStep->GetPostStepPoint();
-	// get TouchableHandle
+	double bFieldPre[3] = {0};
+    double bFieldPost[3] = {0};
+    // get TouchableHandle
 
 	//G4TouchableHandle theTouchable = thePreStepPoint->GetTouchableHandle();
 	const G4Track* lTrack = aStep->GetTrack();
@@ -40,14 +42,13 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep) {
 	} else {
 		thePrePVname = volume->GetName();
 	}
-
 	G4VPhysicalVolume* postvolume = thePostStepPoint->GetPhysicalVolume();
 	std::string thePostPVname("null");
 	if (postvolume == 0) {
 	} else {
 		thePostPVname = postvolume->GetName();
 	}
-
+    
 	G4double edep = aStep->GetTotalEnergyDeposit();
 
 	G4double stepl = 0.;
@@ -100,6 +101,10 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep) {
 		eventAction_->trackids.push_back(trackID);
 		}
 	}
+    //Get Magnetic Field Vectors at pre and post positions
+    volume->GetLogicalVolume()->GetFieldManager()->GetDetectorField()->GetFieldValue(position,bFieldPre);
+    volume->GetLogicalVolume()->GetFieldManager()->GetDetectorField()->GetFieldValue(postPosition,bFieldPost);
+
 	eventAction_->Detect(kineng, edep, stepl, globalTime, pdgId, volume,
 			position, trackID, parentID, genPart, targetParticle);
 }
