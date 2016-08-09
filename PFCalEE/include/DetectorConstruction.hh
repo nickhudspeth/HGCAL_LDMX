@@ -2,7 +2,7 @@
 #define DetectorConstruction_h 1
 
 #include "SamplingSection.hh"
-
+#include "PurgMagTabulatedField3D.hh"
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
 
@@ -31,7 +31,7 @@ public:
 		v_HGCALEE_v6_s05 = 3,
 		v_HGCALEE_v6_s10 = 4,
 		v_HGCALEE_v6_s20 = 5,
-
+        v_BFIELDTEST = 6
 	};
 
 	enum DetectorModel {
@@ -82,7 +82,9 @@ public:
 	void SetDetModel(G4int model);
 
 	void SetMagField(G4double fieldValue);
-	G4UniformMagField* m_magField;      //pointer to the magnetic field
+    void SetMagField(char *fileName, G4double zOffset);
+	PurgMagTabulatedField3D *p_magField;
+    G4UniformMagField* m_magField;      //pointer to the magnetic field
 
 	/**
 	 @short DTOR

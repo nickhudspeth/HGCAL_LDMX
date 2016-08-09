@@ -31,7 +31,21 @@ using namespace std;
 DetectorConstruction::DetectorConstruction(G4int ver, G4int mod, bool signal) :
 		version_(ver), model_(mod) {
 	switch (version_) {
+    
+    case v_BFIELDTEST:
+        {
+            std::vector<std::string> iEle;
+            std::vector<G4double> iThick;
 
+            // Add the target
+            iThick.push_back(.3504*mm); iEle.push_back("W");
+            for(int i = 0; i < 100; i++)
+            {
+                iThick.push_back(1.0*cm); iEle.push_back("G4_Galactic");
+            }
+            m_caloStruct.push_back(SamplingSection(iThick, iEle));
+            break;
+        }
 	case v_HGCALSYM_v1:{
 		G4cout << "[DetectorConstruction] starting v_HGCALSYM_v1" << G4endl;
 

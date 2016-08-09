@@ -15,7 +15,7 @@ class HGCSSGenParticle
 public:
     HGCSSGenParticle() :
         time_(0), xpos_(0), ypos_(0), zpos_(0), mass_(0), px_(0), py_(0), pz_(
-            0), pdgid_(0), charge_(0), trackID_(0), bx_(0), by_(0), bz(0)
+            0), pdgid_(0), charge_(0), trackID_(0), bx_(0), by_(0), bz_(0)
     {
 
     }

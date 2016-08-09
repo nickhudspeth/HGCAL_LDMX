@@ -5,7 +5,7 @@
 
 #include "G4Step.hh"
 #include "G4RunManager.hh"
-
+#include "G4FieldManager.hh"
 #include "HGCSSGenParticle.hh"
 
 //
@@ -27,8 +27,11 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep) {
 	// get PreStepPoint
 	const G4StepPoint *thePreStepPoint = aStep->GetPreStepPoint();
 	const G4StepPoint *thePostStepPoint = aStep->GetPostStepPoint();
-	double bFieldPre[3] = {0};
-    double bFieldPost[3] = {0};
+	double bFieldPre[3] = {0,0,0};
+    double bFieldPost[3] = {0,0,0};
+    double bFieldPosPre[4] = {0,0,0,0};
+    double bFieldPosPost[4] = {0,0,0,0};
+	G4ThreeVector postPosition;
     // get TouchableHandle
 
 	//G4TouchableHandle theTouchable = thePreStepPoint->GetTouchableHandle();
@@ -69,10 +72,10 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep) {
 							&& thePostPVname == "G4_Galactic1phys")))
 	{
 		targetParticle = true;
-		const G4ThreeVector & postposition = thePostStepPoint->GetPosition();
+		postPosition = thePostStepPoint->GetPosition();
 		const G4ThreeVector &p = lTrack->GetMomentum();
 		G4ParticleDefinition *pd = lTrack->GetDefinition();
-		genPart.setPosition(postposition[0], postposition[1], postposition[2]);
+		genPart.setPosition(postPosition[0], postPosition[1], postPosition[2]);
 		genPart.setMomentum(p[0], p[1], p[2]);
 		genPart.mass(pd->GetPDGMass());
 		genPart.time(globalTime);
@@ -86,11 +89,11 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep) {
 
 	if ((id_ == eventAction_->trackids.size()) && (kineng>10)) {
 		if ((abs(pdgId) != 11) && (abs(pdgId) != 22 ) && (pdgId != -2112) && (pdgId != -2212)  && (abs(pdgId) != 310) && (abs(pdgId) != 111)){
-		const G4ThreeVector & postposition = thePostStepPoint->GetPosition();
+		postPosition = thePostStepPoint->GetPosition();
 
 		const G4ThreeVector &p = lTrack->GetMomentum();
 		G4ParticleDefinition *pd = lTrack->GetDefinition();
-		genPart.setPosition(postposition[0], postposition[1], postposition[2]);
+		genPart.setPosition(postPosition[0], postPosition[1], postPosition[2]);
 		genPart.setMomentum(p[0], p[1], p[2]);
 		genPart.mass(pd->GetPDGMass());
 		genPart.time(globalTime);
@@ -102,8 +105,13 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep) {
 		}
 	}
     //Get Magnetic Field Vectors at pre and post positions
-    volume->GetLogicalVolume()->GetFieldManager()->GetDetectorField()->GetFieldValue(position,bFieldPre);
-    volume->GetLogicalVolume()->GetFieldManager()->GetDetectorField()->GetFieldValue(postPosition,bFieldPost);
+    for(int i = 0; i < 3; i++)
+    {
+        bFieldPosPre[i] = position[i];
+        bFieldPosPost[i] = postPosition[i]; 
+    }
+    volume->GetLogicalVolume()->GetFieldManager()->GetDetectorField()->GetFieldValue(bFieldPosPre, bFieldPre);
+    volume->GetLogicalVolume()->GetFieldManager()->GetDetectorField()->GetFieldValue(bFieldPosPost, bFieldPost);
 
 	eventAction_->Detect(kineng, edep, stepl, globalTime, pdgId, volume,
 			position, trackID, parentID, genPart, targetParticle);
