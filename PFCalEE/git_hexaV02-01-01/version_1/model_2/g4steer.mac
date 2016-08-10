@@ -3,6 +3,6 @@
 /run/verbose 0
 /event/verbose 0
 /tracking/verbose 0
-/N03/det/setModel 6
-/random/setSeeds 79646 52376
+/N03/det/setModel 2
+/random/setSeeds 55024 3620
 /run/beamOn 10

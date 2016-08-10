@@ -6,6 +6,7 @@
 #include "G4Step.hh"
 #include "G4RunManager.hh"
 #include "G4FieldManager.hh"
+#include "G4TransportationManager.hh"
 #include "HGCSSGenParticle.hh"
 
 //
@@ -27,11 +28,10 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep) {
 	// get PreStepPoint
 	const G4StepPoint *thePreStepPoint = aStep->GetPreStepPoint();
 	const G4StepPoint *thePostStepPoint = aStep->GetPostStepPoint();
-	double bFieldPre[3] = {0,0,0};
+	double bFieldPre[3] = {999,999,999};
     double bFieldPost[3] = {0,0,0};
     double bFieldPosPre[4] = {0,0,0,0};
     double bFieldPosPost[4] = {0,0,0,0};
-	G4ThreeVector postPosition;
     // get TouchableHandle
 
 	//G4TouchableHandle theTouchable = thePreStepPoint->GetTouchableHandle();
@@ -63,6 +63,7 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep) {
 	G4double kineng = lTrack->GetKineticEnergy();
 
 	const G4ThreeVector & position = thePreStepPoint->GetPosition();
+	G4ThreeVector	postPosition = thePostStepPoint->GetPosition();
 
 	HGCSSGenParticle genPart;
 	G4bool targetParticle = false;
@@ -72,7 +73,7 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep) {
 							&& thePostPVname == "G4_Galactic1phys")))
 	{
 		targetParticle = true;
-		postPosition = thePostStepPoint->GetPosition();
+	    postPosition = thePostStepPoint->GetPosition();
 		const G4ThreeVector &p = lTrack->GetMomentum();
 		G4ParticleDefinition *pd = lTrack->GetDefinition();
 		genPart.setPosition(postPosition[0], postPosition[1], postPosition[2]);
@@ -110,8 +111,24 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep) {
         bFieldPosPre[i] = position[i];
         bFieldPosPost[i] = postPosition[i]; 
     }
-    volume->GetLogicalVolume()->GetFieldManager()->GetDetectorField()->GetFieldValue(bFieldPosPre, bFieldPre);
-    volume->GetLogicalVolume()->GetFieldManager()->GetDetectorField()->GetFieldValue(bFieldPosPost, bFieldPost);
+    volume->GetLogicalVolume()->GetFieldManager()->GetDetectorField();
+    /*
+     * std::cout << "bFieldPosPre = ";
+     * for(int i = 0; i < 3; i++)
+     * {
+     *     std::cout << bFieldPosPre[i] << ", ";
+     * }
+     * std::cout << std::endl;
+     * std::cout << ". bFieldPosPost = ";
+     * for(int i = 0; i < 3; i++)
+     * {
+     *     std::cout << bFieldPosPost[i] << ", ";
+     * }
+     * std::cout << std::endl;
+     */
+    //G4TransportationManager::GetTransportationManager()->GetFieldManager()->GetDetectorField()->GetFieldValue(bFieldPosPre, bFieldPre);
+    G4TransportationManager::GetTransportationManager()->GetFieldManager()->GetDetectorField()->GetFieldValue(bFieldPosPost, bFieldPost);
+    genPart.setBField(bFieldPost[0],bFieldPost[1], bFieldPost[2]);
 
 	eventAction_->Detect(kineng, edep, stepl, globalTime, pdgId, volume,
 			position, trackID, parentID, genPart, targetParticle);

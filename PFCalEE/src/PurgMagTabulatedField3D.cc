@@ -238,11 +238,15 @@ PurgMagTabulatedField3D::PurgMagTabulatedField3D(const char* filename,
 void PurgMagTabulatedField3D::GetFieldValue(const double point[4],
 				      double *Bfield ) const
 {
-
+  //std::cout << "In GetFieldValue" << std::endl;
   double x = point[0];
   double y = point[1];
   double z = point[2] + fZoffset;
-
+  
+  //std::cout << "B-field vector address: " << Bfield << std::endl;
+  //std::cout << "x = " << point[0] << "; y = " << point[1] << "; z = " << point[2] << std::endl;
+  //std::cout << "x = " << Bfield[0] << "; y = " << Bfield[1] << "; z = " << Bfield[2] << std::endl;
+    
   // Check that the point is within the defined region 
   if ( x>=minx && x<=maxx &&
        y>=miny && y<=maxy && 
@@ -314,12 +318,12 @@ void PurgMagTabulatedField3D::GetFieldValue(const double point[4],
       zField[xindex+1][yindex  ][zindex+1] *    xlocal  * (1-ylocal) *    zlocal  +
       zField[xindex+1][yindex+1][zindex  ] *    xlocal  *    ylocal  * (1-zlocal) +
       zField[xindex+1][yindex+1][zindex+1] *    xlocal  *    ylocal  *    zlocal ;
-
   } else {
     Bfield[0] = 0.0;
     Bfield[1] = 0.0;
     Bfield[2] = 0.0;
   }
+  //std::cout << "bx = " << Bfield[0] << "; by = " << Bfield[1] << "; bz = " << Bfield[2] << std::endl;
 }
 
 std::vector<std::string> PurgMagTabulatedField3D::Split(const std::string &s, char delim) {
